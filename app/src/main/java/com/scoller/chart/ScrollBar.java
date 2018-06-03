@@ -52,9 +52,8 @@ public class ScrollBar extends ViewGroup {
     private int mScrollDuration = 250;
 
     private float triangleLenght = 10;    //尖部三角形边长
-    private float verticalWidth = 30f;
-    private float outSpace = verticalWidth;// 柱子与纵轴的距离
-    private float startChart = 50; //柱子开始的横坐标
+    private float outSpace = 30f;// 柱子与纵轴的距离
+    private float startChart = 50f; //柱子开始的横坐标
     private float interval = 90f;//柱子之间的间隔
     private float barWidth = 70f;//柱子的宽度
     private float bottomHeight = 20f;//底部横坐标高度
@@ -162,7 +161,6 @@ public class ScrollBar extends ViewGroup {
         linePaint.setColor(Color.parseColor("#26ffffff"));
         rectList = new ArrayList<>();
         datas = getMonthStrList();
-        datas.add("");
         setOnClickListener(new OnCliclListener() {
             @Override
             public void onclicklistener(int position) {
@@ -249,13 +247,16 @@ public class ScrollBar extends ViewGroup {
             mChartPaint.setShader(linearGradient);
             //画柱状图 矩形
             RectF rectF = new RectF();
-            rectF.left = chartTempStart + mCurrentOrigin.x;
+
             rectF.top = (mHeight - bottomHeight + paddingTop) - realBarHeight;
+            rectF.left = chartTempStart + mCurrentOrigin.x;
             rectF.right = chartTempStart + barWidth + mCurrentOrigin.x;
+
             rectF.bottom = mHeight + paddingTop - bottomHeight;
             rectList.add(rectF);
             //绘制柱子
             canvas.drawRoundRect(rectF, 10F, 10F, mChartPaint);
+
             if (i == pos) {
                 RectF rectTip = new RectF(rectF.left - barWidth / 2, 100, rectF.right + barWidth / 2, 150);
                 //绘制气泡
@@ -267,7 +268,7 @@ public class ScrollBar extends ViewGroup {
                 //绘制气泡和柱子之间的线
                 canvas.drawLine(rectTip.centerX(), rectTip.bottom + triangleLenght, rectTip.centerX(), x1 + (x - x1) * clickmAnimator.getPhaseY(), linePaint);
                 //画顶部日期
-                if (i == verticalList.size() - 2) {
+                if (i == verticalList.size() - 1) {
                     canvas.drawText("今日", chartTempStart + mCurrentOrigin.x + 30, paddingTop / 3, clickTextPaint);
                 } else {
                     canvas.drawText(datas.get(i), chartTempStart + mCurrentOrigin.x + 30, paddingTop / 3, clickTextPaint);
@@ -277,7 +278,7 @@ public class ScrollBar extends ViewGroup {
                 canvas.drawText(String.valueOf(1000 + 1000 * clickmAnimator.getPhaseY()), rectF.centerX(), bottomLineY, clickTextPaint);
             } else {
                 //画顶部日期
-                if (i == verticalList.size() - 2) {
+                if (i == verticalList.size() - 1) {
                     canvas.drawText("今日", chartTempStart + mCurrentOrigin.x + 30, paddingTop / 3, textPaint);
                 } else {
                     canvas.drawText(datas.get(i), chartTempStart + mCurrentOrigin.x + 30, paddingTop / 3, textPaint);
@@ -285,7 +286,17 @@ public class ScrollBar extends ViewGroup {
             }
             chartTempStart += (barWidth + interval);
         }
+        chartTempStart += 50 + interval;
+        Log.d("ggh", "总长度" + chartTempStart + "");
+        RectF rectF = new RectF();
 
+        rectF.top = 0;
+        rectF.left = rectList.get(rectList.size()-1).right;
+        rectF.right = rectList.get(rectList.size()-1).right+interval;
+
+        rectF.bottom = mHeight + paddingTop - bottomHeight;
+        //绘制柱子
+        canvas.drawRoundRect(rectF, 10F, 10F, mChartPaint);
 
     }
 
@@ -296,9 +307,8 @@ public class ScrollBar extends ViewGroup {
      */
     public void setVerticalList(List<Float> verticalList) {
         if (verticalList != null) {
-            verticalList.add(0f);
             this.verticalList = verticalList;
-            pos = datas.size() - 2;
+            pos = datas.size() - 1;
 
         } else {
             maxValue = "2";
@@ -439,7 +449,7 @@ public class ScrollBar extends ViewGroup {
         //手指按下
         @Override
         public boolean onDown(MotionEvent e) {
-            goToNearestBar();
+//            goToNearestBar();
             float x = e.getX();
             float y = e.getY();
             Iterator<RectF> it = rectList.iterator();
@@ -535,12 +545,12 @@ public class ScrollBar extends ViewGroup {
     public void computeScroll() {
         super.computeScroll();
         if (mScroller.isFinished()) {//当前滚动是否结束
-            goToNearestBar();
+//            goToNearestBar();
         } else {
 
             if (mCurrentFlingDirection != Direction.NONE && forceFinishScroll()) { //惯性滑动时保证最左边条目展示正确
                 Log.d("ggh", "3");
-                goToNearestBar();
+//                goToNearestBar();
             } else if (mScroller.computeScrollOffset()) {//滑动是否结束 记录最新的滑动的点 惯性滑动处理
                 Log.d("ggh", "4");
                 mCurrentOrigin.y = mScroller.getCurrY();
@@ -572,7 +582,7 @@ public class ScrollBar extends ViewGroup {
         // 正常滑动结束后 处理最左边的条目
         if (event.getAction() == MotionEvent.ACTION_UP && mCurrentFlingDirection == Direction.NONE) {
             if (mCurrentScrollDirection == RIGHT || mCurrentScrollDirection == Direction.LEFT) {
-                goToNearestBar();
+//                goToNearestBar();
             }
             mCurrentScrollDirection = Direction.NONE;
         }

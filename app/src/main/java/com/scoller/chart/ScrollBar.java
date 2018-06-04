@@ -55,7 +55,7 @@ public class ScrollBar extends ViewGroup {
     private float outSpace = 30f;// 柱子与纵轴的距离
     private float startChart = 50f; //柱子开始的横坐标
     private float interval = 90f;//柱子之间的间隔
-    private float barWidth = 70f;//柱子的宽度
+    private float barWidth = 50f;//柱子的宽度
     private float bottomHeight = 20f;//底部横坐标高度
     private float mXScrollingSpeed = 1f;    //滑动速度
 
@@ -219,7 +219,7 @@ public class ScrollBar extends ViewGroup {
         float textHeight = mHeight + paddingTop - bottomHeight;//横坐标高度
         //控制图表滑动左右边界
         if (mCurrentOrigin.x < getWidth() - (verticalList.size() * barWidth + (verticalList.size() - 1) * interval + outSpace))
-            mCurrentOrigin.x = getWidth() - (verticalList.size() * barWidth + (verticalList.size() - 1) * interval + outSpace);
+            mCurrentOrigin.x = getWidth() - (verticalList.size() * barWidth + (verticalList.size() - 1) * interval + outSpace + startChart);
         if (mCurrentOrigin.x > 0)
             mCurrentOrigin.x = 0;
         float chartTempStart = startChart;
@@ -286,17 +286,7 @@ public class ScrollBar extends ViewGroup {
             }
             chartTempStart += (barWidth + interval);
         }
-        chartTempStart += 50 + interval;
-        Log.d("ggh", "总长度" + chartTempStart + "");
-        RectF rectF = new RectF();
 
-        rectF.top = 0;
-        rectF.left = rectList.get(rectList.size()-1).right;
-        rectF.right = rectList.get(rectList.size()-1).right+interval;
-
-        rectF.bottom = mHeight + paddingTop - bottomHeight;
-        //绘制柱子
-        canvas.drawRoundRect(rectF, 10F, 10F, mChartPaint);
 
     }
 
@@ -449,7 +439,7 @@ public class ScrollBar extends ViewGroup {
         //手指按下
         @Override
         public boolean onDown(MotionEvent e) {
-//            goToNearestBar();
+            goToNearestBar();
             float x = e.getX();
             float y = e.getY();
             Iterator<RectF> it = rectList.iterator();
@@ -470,6 +460,7 @@ public class ScrollBar extends ViewGroup {
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             switch (mCurrentScrollDirection) {
                 case NONE:
+                    Log.d("ggh", "none");
                     // 只允许在一个方向上滑动
                     if (Math.abs(distanceX) > Math.abs(distanceY)) {
                         if (distanceX > 0) {
@@ -484,12 +475,14 @@ public class ScrollBar extends ViewGroup {
                 case LEFT:
                     // Change direction if there was enough change.
                     if (Math.abs(distanceX) > Math.abs(distanceY) && (distanceX < 0)) {
+                        Log.d("ggh", "LEFT");
                         mCurrentScrollDirection = RIGHT;
                     }
                     break;
                 case RIGHT:
                     // Change direction if there was enough change.
                     if (Math.abs(distanceX) > Math.abs(distanceY) && (distanceX > 0)) {
+                        Log.d("ggh", "RIGHT");
                         mCurrentScrollDirection = Direction.LEFT;
                     }
                     break;
@@ -545,14 +538,12 @@ public class ScrollBar extends ViewGroup {
     public void computeScroll() {
         super.computeScroll();
         if (mScroller.isFinished()) {//当前滚动是否结束
-//            goToNearestBar();
+            goToNearestBar();
         } else {
 
             if (mCurrentFlingDirection != Direction.NONE && forceFinishScroll()) { //惯性滑动时保证最左边条目展示正确
-                Log.d("ggh", "3");
-//                goToNearestBar();
+                goToNearestBar();
             } else if (mScroller.computeScrollOffset()) {//滑动是否结束 记录最新的滑动的点 惯性滑动处理
-                Log.d("ggh", "4");
                 mCurrentOrigin.y = mScroller.getCurrY();
                 mCurrentOrigin.x = mScroller.getCurrX();
                 ViewCompat.postInvalidateOnAnimation(this);
@@ -582,7 +573,7 @@ public class ScrollBar extends ViewGroup {
         // 正常滑动结束后 处理最左边的条目
         if (event.getAction() == MotionEvent.ACTION_UP && mCurrentFlingDirection == Direction.NONE) {
             if (mCurrentScrollDirection == RIGHT || mCurrentScrollDirection == Direction.LEFT) {
-//                goToNearestBar();
+                goToNearestBar();
             }
             mCurrentScrollDirection = Direction.NONE;
         }
